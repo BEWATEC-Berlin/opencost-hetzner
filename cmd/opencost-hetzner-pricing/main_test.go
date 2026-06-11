@@ -25,12 +25,15 @@ func (f fakeFetcher) FetchPricingInput(context.Context, *config.Config) (pricing
 
 func TestWriteHelmValues(t *testing.T) {
 	var out bytes.Buffer
-	writeHelmValues(&out, &pricing.CustomPricing{
+	err := writeHelmValues(&out, &pricing.CustomPricing{
 		Description: "Generated Hetzner pricing bridge",
 		CPU:         "0.001",
 		RAM:         "0.002",
 		Storage:     "0.0001",
 	})
+	if err != nil {
+		t.Fatalf("writeHelmValues() error = %v", err)
+	}
 
 	got := out.String()
 	for _, want := range []string{
@@ -44,6 +47,24 @@ func TestWriteHelmValues(t *testing.T) {
 			t.Fatalf("helm output missing %q:\n%s", want, got)
 		}
 	}
+}
+
+func TestWriteHelmValuesReturnsWriteError(t *testing.T) {
+	err := writeHelmValues(failingWriter{}, &pricing.CustomPricing{
+		Description: "Generated Hetzner pricing bridge",
+		CPU:         "0.001",
+		RAM:         "0.002",
+		Storage:     "0.0001",
+	})
+	if err == nil {
+		t.Fatal("writeHelmValues() error = nil, want error")
+	}
+}
+
+type failingWriter struct{}
+
+func (failingWriter) Write([]byte) (int, error) {
+	return 0, errors.New("write failed")
 }
 
 func TestRunRejectsUnsupportedFormatBeforeReadingConfig(t *testing.T) {

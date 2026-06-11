@@ -77,8 +77,11 @@ func Load(r io.Reader) (*Config, error) {
 		cfg.Projects[idx].Token = project.Token
 	}
 
-	if cfg.Persistence.Enabled && strings.TrimSpace(cfg.Persistence.Path) == "" {
-		return nil, fmt.Errorf("persistence.path is required when persistence is enabled")
+	if cfg.Persistence.Enabled {
+		cfg.Persistence.Path = strings.TrimSpace(cfg.Persistence.Path)
+		if cfg.Persistence.Path == "" {
+			return nil, fmt.Errorf("persistence.path is required when persistence is enabled")
+		}
 	}
 
 	return &cfg, nil

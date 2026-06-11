@@ -29,6 +29,22 @@ func TestLoadDefaultsCurrencyModeToNet(t *testing.T) {
 	}
 }
 
+func TestLoadTrimsPersistencePath(t *testing.T) {
+	cfg, err := Load(strings.NewReader(`{
+		"projects": [
+			{"name": "prod", "token": "secret"}
+		],
+		"persistence": {"enabled": true, "path": " /data "}
+	}`))
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+
+	if cfg.Persistence.Path != "/data" {
+		t.Fatalf("Persistence.Path = %q, want /data", cfg.Persistence.Path)
+	}
+}
+
 func TestLoadRejectsMissingProjects(t *testing.T) {
 	_, err := Load(strings.NewReader(`{"currency_mode":"net"}`))
 	if err == nil {

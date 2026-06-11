@@ -71,3 +71,40 @@ func TestGenerateCustomPricingRejectsInvalidCurrencyMode(t *testing.T) {
 		t.Fatal("GenerateCustomPricing() error = nil, want error")
 	}
 }
+
+func TestGenerateCustomPricingRejectsMissingNetVolumePricing(t *testing.T) {
+	_, err := GenerateCustomPricing(Input{
+		CurrencyMode: "net",
+		Servers: []Server{{
+			ID:            1,
+			Name:          "worker-a",
+			Type:          "cpx21",
+			Location:      "fsn1",
+			VCPU:          3,
+			RAMGiB:        4,
+			HourlyCostNet: 0.012,
+		}},
+	})
+	if err == nil {
+		t.Fatal("GenerateCustomPricing() error = nil, want error")
+	}
+}
+
+func TestGenerateCustomPricingRejectsMissingGrossVolumePricing(t *testing.T) {
+	_, err := GenerateCustomPricing(Input{
+		CurrencyMode: "gross",
+		Servers: []Server{{
+			ID:              1,
+			Name:            "worker-a",
+			Type:            "cpx21",
+			Location:        "fsn1",
+			VCPU:            3,
+			RAMGiB:          4,
+			HourlyCostGross: 0.0143,
+		}},
+		Volume: VolumePricing{PerGBMonthNet: 0.0476},
+	})
+	if err == nil {
+		t.Fatal("GenerateCustomPricing() error = nil, want error")
+	}
+}

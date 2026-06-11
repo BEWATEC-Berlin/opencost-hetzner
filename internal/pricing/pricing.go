@@ -155,6 +155,9 @@ func GenerateCustomPricing(input Input) (*CustomPricing, error) {
 	if input.CurrencyMode == "gross" {
 		storageMonthly = input.Volume.PerGBMonthGross
 	}
+	if storageMonthly <= 0 {
+		return nil, fmt.Errorf("volume pricing must be positive, got %.10f", storageMonthly)
+	}
 
 	return &CustomPricing{
 		Provider:    "custom",

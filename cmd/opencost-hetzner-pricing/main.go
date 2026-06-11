@@ -77,8 +77,7 @@ func runWithFetcher(ctx context.Context, configPath, format string, stdout io.Wr
 		if err != nil {
 			return err
 		}
-		writeHelmValues(stdout, customPricing)
-		return nil
+		return writeHelmValues(stdout, customPricing)
 	case "csv":
 		rows, err := csvpricing.GenerateRows(csvpricing.Input{
 			CurrencyMode:   input.CurrencyMode,
@@ -143,16 +142,25 @@ func defaultWindow(now time.Time) (time.Time, time.Time) {
 	return end.Add(-time.Hour), end
 }
 
-func writeHelmValues(stdout io.Writer, customPricing *pricing.CustomPricing) {
-	fmt.Fprintf(stdout, "opencost:\n")
-	fmt.Fprintf(stdout, "  customPricing:\n")
-	fmt.Fprintf(stdout, "    enabled: true\n")
-	fmt.Fprintf(stdout, "    provider: custom\n")
-	fmt.Fprintf(stdout, "    costModel:\n")
-	fmt.Fprintf(stdout, "      description: %q\n", customPricing.Description)
-	fmt.Fprintf(stdout, "      CPU: %q\n", customPricing.CPU)
-	fmt.Fprintf(stdout, "      RAM: %q\n", customPricing.RAM)
-	fmt.Fprintf(stdout, "      storage: %q\n", customPricing.Storage)
+func writeHelmValues(stdout io.Writer, customPricing *pricing.CustomPricing) error {
+	var err error
+	write := func(format string, args ...interface{}) {
+		if err != nil {
+			return
+		}
+		_, err = fmt.Fprintf(stdout, format, args...)
+	}
+
+	write("opencost:\n")
+	write("  customPricing:\n")
+	write("    enabled: true\n")
+	write("    provider: custom\n")
+	write("    costModel:\n")
+	write("      description: %q\n", customPricing.Description)
+	write("      CPU: %q\n", customPricing.CPU)
+	write("      RAM: %q\n", customPricing.RAM)
+	write("      storage: %q\n", customPricing.Storage)
+	return err
 }
 
 func marshalJSON(customPricing *pricing.CustomPricing) ([]byte, error) {

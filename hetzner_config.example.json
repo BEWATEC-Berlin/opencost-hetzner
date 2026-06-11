@@ -1,0 +1,33 @@
+{
+  "log_level": "info",
+  "currency_mode": "net",
+  "projects": [
+    {
+      "name": "production",
+      "token": "replace-with-read-only-hcloud-token",
+      "label_selector": ""
+    },
+    {
+      "name": "staging",
+      "token": "replace-with-read-only-hcloud-token",
+      "label_selector": ""
+    }
+  ],
+  "persistence": {
+    "enabled": true,
+    "path": "/var/lib/opencost-hetzner"
+  },
+  "kubernetes": {
+    "storage_classes": [
+      "hcloud-volumes"
+    ]
+  },
+  "include": {
+    "servers": true,
+    "volumes": true,
+    "load_balancers": true,
+    "primary_ips": true,
+    "floating_ips": true,
+    "traffic": true
+  }
+}
